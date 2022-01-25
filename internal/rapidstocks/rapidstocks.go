@@ -1,21 +1,28 @@
 package rapidstocks
 
-// uses this boi
-// https://rapidapi.com/datascraper/api/live-stock-market/
-
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
-type Response struct {
+type GetStockResponse struct {
 	Status int
 	Data   struct {
 		QuoteResponse struct {
 			Result []RespQuote
+		}
+	}
+}
+
+type ValidateTickerResponse struct {
+	Status int
+	Data   struct {
+		SymbolsValidation struct {
+			Result []map[string]bool
 		}
 	}
 }
@@ -45,6 +52,20 @@ var token string
 
 const reqAppend string = "/yahoo-finance/v1"
 
+func getRequest(reqUrl string) *http.Response {
+	req, _ := http.NewRequest("GET", reqUrl, nil)
+
+	req.Header.Add("x-rapidapi-host", url)
+	req.Header.Add("x-rapidapi-key", token)
+
+	res, resError := http.DefaultClient.Do(req)
+	if resError != nil {
+		log.Fatal(resError.Error())
+	}
+
+	return res
+}
+
 func Configure(envUrl string, envToken string) {
 	url = envUrl
 	token = envToken
@@ -56,20 +77,15 @@ func Configure(envUrl string, envToken string) {
 //Get one stock
 func GetStock(ticker string) []RespQuote {
 	reqUrl := "https://" + url + reqAppend + "/quote?symbols=" + ticker
-	req, _ := http.NewRequest("GET", reqUrl, nil)
-
-	req.Header.Add("x-rapidapi-host", url)
-	req.Header.Add("x-rapidapi-key", token)
-
-	res, resError := http.DefaultClient.Do(req)
-	if resError != nil {
-		log.Fatal(resError)
-	}
+	res := getRequest(reqUrl)
 
 	defer res.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(res.Body)
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	var body Response
+	var body GetStockResponse
 	json.Unmarshal(bodyBytes, &body)
 
 	fmt.Println(res)
@@ -79,7 +95,25 @@ func GetStock(ticker string) []RespQuote {
 
 }
 
-//Get list of stock
+func ValidateTicker(ticker string) bool {
+	strippedString := strings.ReplaceAll(ticker, " ", "")
+	reqUrl := "https://" + url + reqAppend + "/symbols-validation?symbols=" + strippedString
+	res := getRequest(reqUrl)
+	defer res.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var body ValidateTickerResponse
+	json.Unmarshal(bodyBytes, &body)
+	firstTicker := body.Data.SymbolsValidation.Result[0]
+	fmt.Println(body.Data.SymbolsValidation.Result)
+	if firstTicker[ticker] == true {
+		return true
+	}
+	return false
+}
 
 func Task() {
 	fmt.Println("I am running task.")

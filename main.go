@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +17,11 @@ import (
 )
 
 var tickers []string
+
+type AddTickerReq struct {
+	Text        string `form:"text" binding:"required"`
+	ResponseUrl string `form:"response_url" binding:"required"`
+}
 
 func init() {
 	env := os.Getenv("ENVIRONMENT")
@@ -77,7 +83,8 @@ func StartGin() {
 
 	router.GET("/ping", respondPong)
 	router.GET("/stock/:ticker", getStock)
-	router.GET("/showTickers", showTickers)
+	router.POST("/showTickers", showTickers)
+	router.POST("/addTicker", addTicker)
 
 	router.Run(address)
 }
@@ -98,5 +105,21 @@ func getStock(c *gin.Context) {
 
 func showTickers(c *gin.Context) {
 	stockyboiapi.SlashCommandShowTickers(tickers)
-	c.Status(http.StatusNoContent)
+	c.String(http.StatusOK, "Tickers Sent")
+}
+
+func addTicker(c *gin.Context) {
+	var request AddTickerReq
+	err := c.ShouldBind(&request)
+	if err != nil {
+		log.Fatal(err)
+	}
+	valid := rapidstocks.ValidateTicker(request.Text)
+	fmt.Println(valid)
+	if !valid {
+		c.String(http.StatusOK, "Ticker not valid")
+		return
+	}
+	tickers = append(tickers, request.Text)
+	c.String(http.StatusOK, "Ticker added")
 }

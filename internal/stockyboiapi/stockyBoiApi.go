@@ -17,6 +17,22 @@ type SlackChatPostMessageText struct {
 	Text    string `json:"text"`
 }
 
+type SlackRespond struct {
+	Text string `json:"text"`
+}
+
+func postToSlack(url string, body []byte) {
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(body))
+
+	req.Header.Add("Authorization", "Bearer "+slackApiKey)
+	req.Header.Add("Content-Type", "application/json")
+
+	_, resError := http.DefaultClient.Do(req)
+	if resError != nil {
+		log.Fatal(resError)
+	}
+}
+
 func Configure(
 	envSlackApiKey string,
 	envSlackEndpoint string,
@@ -40,13 +56,16 @@ func SlashCommandShowTickers(tickers []string) {
 	if err != nil {
 		log.Fatalf("could not marshal JSON: %s", err)
 	}
-	req, _ := http.NewRequest("POST", reqUrl, bytes.NewBuffer(jsonStr))
+	postToSlack(reqUrl, jsonStr)
+}
 
-	req.Header.Add("Authorization", "Bearer "+slackApiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	_, resError := http.DefaultClient.Do(req)
-	if resError != nil {
-		log.Fatal(resError)
+func SlackRespondToSlashCommand(message string, responseUrl string) {
+	jsonData := &SlackRespond{
+		Text: message,
 	}
+	jsonStr, err := json.Marshal(jsonData)
+	if err != nil {
+		log.Fatalf("could not marshal JSON: %s", err)
+	}
+	postToSlack(responseUrl, jsonStr)
 }
