@@ -21,6 +21,7 @@ type SlackRespond struct {
 	Text string `json:"text"`
 }
 
+//Internal: Creates a reqest and posts to a slack URL/Webhook.
 func postToSlack(url string, body []byte) {
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(body))
 
@@ -33,6 +34,8 @@ func postToSlack(url string, body []byte) {
 	}
 }
 
+// Configures the module with passed variables.
+// Must be called before any other methods are called.
 func Configure(
 	envSlackApiKey string,
 	envSlackEndpoint string,
@@ -45,6 +48,7 @@ func Configure(
 	}
 }
 
+// Marshalls passed tickers and posts them to slack.
 func SlashCommandShowTickers(tickers []string) {
 	reqUrl := slackEndpoint + "/chat.postMessage"
 	jsonData := &SlackChatPostMessageText{
@@ -59,6 +63,7 @@ func SlashCommandShowTickers(tickers []string) {
 	postToSlack(reqUrl, jsonStr)
 }
 
+// Posts a message response to slack using the passed URL.
 func SlackRespondToSlashCommand(message string, responseUrl string) {
 	jsonData := &SlackRespond{
 		Text: message,

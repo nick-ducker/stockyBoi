@@ -52,6 +52,8 @@ var token string
 
 const reqAppend string = "/yahoo-finance/v1"
 
+// Performs a get request to the rapidstocks api.
+// Requires the module to be configured with the Configure method.
 func getRequest(reqUrl string) *http.Response {
 	req, _ := http.NewRequest("GET", reqUrl, nil)
 
@@ -66,6 +68,8 @@ func getRequest(reqUrl string) *http.Response {
 	return res
 }
 
+// Configures the module with passed variables.
+// Must be called before any other methods are called.
 func Configure(envUrl string, envToken string) {
 	url = envUrl
 	token = envToken
@@ -74,7 +78,13 @@ func Configure(envUrl string, envToken string) {
 	}
 }
 
-//Get one stock
+/**
+Queries the RapidAPI stocks endpoint and returns.
+=> Regular market open
+=> Regular market day range
+=> Regular market price
+=> Regular market previous close
+**/
 func GetStock(ticker string) []RespQuote {
 	reqUrl := "https://" + url + reqAppend + "/quote?symbols=" + ticker
 	res := getRequest(reqUrl)
@@ -88,13 +98,10 @@ func GetStock(ticker string) []RespQuote {
 	var body GetStockResponse
 	json.Unmarshal(bodyBytes, &body)
 
-	fmt.Println(res)
-	fmt.Println(body)
-
 	return body.Data.QuoteResponse.Result
-
 }
 
+// Takes one ticker and checks it against RapidAPI.
 func ValidateTicker(ticker string) bool {
 	strippedString := strings.ReplaceAll(ticker, " ", "")
 	reqUrl := "https://" + url + reqAppend + "/symbols-validation?symbols=" + strippedString
@@ -115,6 +122,7 @@ func ValidateTicker(ticker string) bool {
 	return false
 }
 
+// Junk for now.
 func Task() {
 	fmt.Println("I am running task.")
 }
