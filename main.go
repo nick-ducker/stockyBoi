@@ -84,7 +84,7 @@ func StartGin() {
 	router := gin.Default()
 
 	router.GET("/ping", respondPong)
-	router.GET("/stock/:ticker", getStock)
+	// router.GET("/stock/:ticker", getStock)
 	router.POST("/showTickers", showTickers)
 	router.POST("/addTicker", addTicker)
 
@@ -98,13 +98,13 @@ func respondPong(c *gin.Context) {
 }
 
 // Gets details for a particular stock and returns them.
-func getStock(c *gin.Context) {
-	ticker := c.Param("ticker")
+// func getStock(c *gin.Context) {
+// 	ticker := c.Param("ticker")
 
-	quotes := rapidstocks.GetStock(ticker)
+// 	quotes := rapidstocks.GetStocks(ticker)
 
-	c.IndentedJSON(http.StatusOK, quotes)
-}
+// 	c.IndentedJSON(http.StatusOK, quotes)
+// }
 
 // Returns all tickers currently registered for the session.
 func showTickers(c *gin.Context) {
