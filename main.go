@@ -16,6 +16,7 @@ import (
 	//"github.com/robfig/cron"
 )
 
+// Stores tickers that will be tracked daily
 var tickers []string
 
 type AddTickerReq struct {
@@ -23,6 +24,7 @@ type AddTickerReq struct {
 	ResponseUrl string `form:"response_url" binding:"required"`
 }
 
+// Init the .env file if not running in production
 func init() {
 	env := os.Getenv("ENVIRONMENT")
 	if env != "production" {
@@ -95,6 +97,7 @@ func respondPong(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
 }
 
+// Gets details for a particular stock and returns them.
 func getStock(c *gin.Context) {
 	ticker := c.Param("ticker")
 
@@ -103,11 +106,13 @@ func getStock(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, quotes)
 }
 
+// Returns all tickers currently registered for the session.
 func showTickers(c *gin.Context) {
 	stockyboiapi.SlashCommandShowTickers(tickers)
 	c.String(http.StatusOK, "Tickers Sent")
 }
 
+// First checks the ticker against the API then stores it.
 func addTicker(c *gin.Context) {
 	var request AddTickerReq
 	err := c.ShouldBind(&request)
