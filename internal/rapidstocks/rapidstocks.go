@@ -85,8 +85,9 @@ Queries the RapidAPI stocks endpoint and returns.
 => Regular market price
 => Regular market previous close
 **/
-func GetStock(ticker string) []RespQuote {
-	reqUrl := "https://" + url + reqAppend + "/quote?symbols=" + ticker
+func GetStocks(tickers []string) []RespQuote {
+	formattedTickers := strings.Join(tickers, "%2")
+	reqUrl := "https://" + url + reqAppend + "/quote?symbols=" + formattedTickers
 	res := getRequest(reqUrl)
 
 	defer res.Body.Close()
