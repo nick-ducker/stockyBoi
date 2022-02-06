@@ -1,19 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	// "time"
+	"time"
 
 	"internal/rapidstocks"
 	"internal/stockyboiapi"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	//"github.com/robfig/cron"
+	"github.com/robfig/cron"
 )
 
 // Stores tickers that will be tracked daily
@@ -36,7 +37,6 @@ func init() {
 }
 
 func main() {
-	// StartCron()
 	rapidstocks.Configure(
 		os.Getenv("RAPID_STOCKS_URL"),
 		os.Getenv("RAPID_STOCKS_TOKEN"),
@@ -46,18 +46,32 @@ func main() {
 		os.Getenv("SLACK_API_ENDPOINT"),
 		os.Getenv("SLACK_API_CHANNEL"),
 	)
+	StartCron()
 	StartGin()
 }
 
-// func StartCron() {
-// 	timeZone, _ := time.LoadLocation("Australia/Adelaide")
+func StartCron() {
+	asxTimeZone := os.Getenv("TIMEZONE")
+	timeZone, _ := time.LoadLocation(asxTimeZone)
 
-// 	job := cron.NewWithLocation(timeZone)
-// 	job.AddFunc("* * * * * *", func() {
-// 		rapidstocks.Task()
-// 	})
-// 	job.Start()
-// }
+	openingJob := cron.NewWithLocation(timeZone)
+	openingJob.AddFunc("5 10 * * * *", func() {
+		stockSummary(asxTimeZone)
+	})
+
+	middayJob := cron.NewWithLocation(timeZone)
+	openingJob.AddFunc("0 13 * * * *", func() {
+		stockSummary(asxTimeZone)
+	})
+
+	closingJob := cron.NewWithLocation(timeZone)
+	openingJob.AddFunc("45 15 * * * *", func() {
+		stockSummary(asxTimeZone)
+	})
+	openingJob.Start()
+	middayJob.Start()
+	closingJob.Start()
+}
 
 func StartGin() {
 	port := os.Getenv("PORT")
@@ -84,7 +98,7 @@ func StartGin() {
 	router := gin.Default()
 
 	router.GET("/ping", respondPong)
-	// router.GET("/stock/:ticker", getStock)
+	router.POST("/showSummary", showSummary)
 	router.POST("/showTickers", showTickers)
 	router.POST("/addTicker", addTicker)
 
@@ -97,14 +111,29 @@ func respondPong(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
 }
 
-// Gets details for a particular stock and returns them.
-// func getStock(c *gin.Context) {
-// 	ticker := c.Param("ticker")
+// Gets details on current tickers and posts them
+// to slack.
+func stockSummary(timezone string) {
+	quotes := rapidstocks.GetStocks(tickers)
+	formattedQuoteBlocks := stockyboiapi.FormatQuotes(quotes, timezone)
+	jsonResp, _ := json.Marshal(formattedQuoteBlocks)
+	stockyboiapi.PostToSlack("", jsonResp)
+}
 
-// 	quotes := rapidstocks.GetStocks(ticker)
+// Simple slash command support for showing current tickers
+func showSummary(c *gin.Context) {
+	stockSummary(os.Getenv("TIMEZONE"))
+}
 
-// 	c.IndentedJSON(http.StatusOK, quotes)
-// }
+// Automated cron job for posting ticker details
+func cronStockSummary(timezone string) {
+	time.LoadLocation(timezone)
+	day := time.Now().Weekday()
+	// Sunday = 0, Saturday = 6
+	if day != 0 && day != 6 {
+		stockSummary(timezone)
+	}
+}
 
 // Returns all tickers currently registered for the session.
 func showTickers(c *gin.Context) {
