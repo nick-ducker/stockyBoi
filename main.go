@@ -96,6 +96,7 @@ func StartGin() {
 	}
 
 	router := gin.Default()
+	router.SetTrustedProxies(nil)
 
 	router.GET("/ping", respondPong)
 	router.POST("/showSummary", showSummary)
