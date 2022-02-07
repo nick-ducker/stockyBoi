@@ -28,7 +28,7 @@ type AddTickerReq struct {
 // Init the .env file if not running in production
 func init() {
 	env := os.Getenv("ENVIRONMENT")
-	if env != "production" {
+	if env != "production" && env != "docker" {
 		err := godotenv.Load(".env")
 		if err != nil {
 			log.Fatal("Error loading .env file")
@@ -52,20 +52,25 @@ func main() {
 
 func StartCron() {
 	asxTimeZone := os.Getenv("TIMEZONE")
-	timeZone, _ := time.LoadLocation(asxTimeZone)
-
+	timeZone, err := time.LoadLocation(asxTimeZone)
+	if err != nil {
+		log.Fatal(err)
+	}
 	openingJob := cron.NewWithLocation(timeZone)
 	openingJob.AddFunc("5 10 * * * *", func() {
+		log.Println("I'm DINGING")
 		stockSummary(asxTimeZone)
 	})
 
 	middayJob := cron.NewWithLocation(timeZone)
 	openingJob.AddFunc("0 13 * * * *", func() {
+		log.Println("I'm DONGING")
 		stockSummary(asxTimeZone)
 	})
 
 	closingJob := cron.NewWithLocation(timeZone)
 	openingJob.AddFunc("45 15 * * * *", func() {
+		log.Println("I'm BONGING")
 		stockSummary(asxTimeZone)
 	})
 	openingJob.Start()
@@ -82,14 +87,14 @@ func StartGin() {
 		log.Fatal("$ENVIRONMENT must be set")
 	}
 
-	if env == "production" || env == "development" {
+	if env == "production" || env == "development" || env == "docker" {
 		if env == "production" {
 			if port == "" {
 				log.Fatal("$PORT must be set")
 			}
 			address = ":" + port
 		} else {
-			address = "localhost:8080"
+			address = ":8080"
 		}
 	} else {
 		log.Fatal("$ENVIRONMENT not recognised")

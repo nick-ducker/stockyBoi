@@ -110,7 +110,7 @@ func FormatQuotes(quotes []rapidstocks.RespQuote, timezone string) BlocksRespTyp
 	// https://app.slack.com/block-kit-builder/T02SDF83ZLN#%7B%22blocks%22:%5B%7B%22type%22:%22header%22,%22text%22:%7B%22type%22:%22plain_text%22,%22text%22:%22Good%20morning!%20:sunrise_over_mountains:%22,%22emoji%22:true%7D%7D,%7B%22type%22:%22divider%22%7D,%7B%22type%22:%22section%22,%22text%22:%7B%22type%22:%22mrkdwn%22,%22text%22:%22*PLB*%20XYZ%22%7D%7D,%7B%22type%22:%22section%22,%22fields%22:%5B%7B%22type%22:%22mrkdwn%22,%22text%22:%22_Opening%20Price_:%20*xyz*%22%7D,%7B%22type%22:%22mrkdwn%22,%22text%22:%22_Previous%20Close_:%20*xyz*%22%7D,%7B%22type%22:%22mrkdwn%22,%22text%22:%22_Range_:%20*xyz*%22%7D,%7B%22type%22:%22mrkdwn%22,%22text%22:%22_Current%20Price_:%20*xyz*%22%7D%5D%7D%5D%7D
 	var message string
 	if hour > 0 && hour < 11 {
-		message = "Good Morning! :sunrise_over_mountains"
+		message = "Good Morning! :sunrise_over_mountains:"
 	} else if hour > 11 && hour < 2 {
 		message = "Good Afternoon! :desert:"
 	} else {
