@@ -57,20 +57,17 @@ func StartCron() {
 		log.Fatal(err)
 	}
 	openingJob := cron.NewWithLocation(timeZone)
-	openingJob.AddFunc("5 10 * * * *", func() {
-		log.Println("I'm DINGING")
+	openingJob.AddFunc("0 5 10 * * *", func() {
 		stockSummary(asxTimeZone)
 	})
 
 	middayJob := cron.NewWithLocation(timeZone)
-	openingJob.AddFunc("0 13 * * * *", func() {
-		log.Println("I'm DONGING")
+	middayJob.AddFunc("0 0 13 * * *", func() {
 		stockSummary(asxTimeZone)
 	})
 
 	closingJob := cron.NewWithLocation(timeZone)
-	openingJob.AddFunc("45 15 * * * *", func() {
-		log.Println("I'm BONGING")
+	closingJob.AddFunc("0 11 20 * * *", func() {
 		stockSummary(asxTimeZone)
 	})
 	openingJob.Start()
