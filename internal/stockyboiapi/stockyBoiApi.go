@@ -111,7 +111,7 @@ func FormatQuotes(quotes []rapidstocks.RespQuote, timezone string) BlocksRespTyp
 	var message string
 	if hour > 0 && hour < 11 {
 		message = "Good Morning! :sunrise_over_mountains:"
-	} else if hour > 11 && hour < 2 {
+	} else if hour > 11 && hour < 14 {
 		message = "Good Afternoon! :desert:"
 	} else {
 		message = "Good Evening! :city_sunset:"
