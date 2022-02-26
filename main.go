@@ -117,10 +117,17 @@ func respondPong(c *gin.Context) {
 // Gets details on current tickers and posts them
 // to slack.
 func stockSummary(timezone string) {
-	quotes := rapidstocks.GetStocks(tickers)
-	formattedQuoteBlocks := stockyboiapi.FormatQuotes(quotes, timezone)
-	jsonResp, _ := json.Marshal(formattedQuoteBlocks)
-	stockyboiapi.PostToSlack("", jsonResp)
+	if len(tickers) > 0 {
+		quotes := rapidstocks.GetStocks(tickers)
+		formattedQuoteBlocks := stockyboiapi.FormatQuotes(quotes, timezone)
+		jsonResp, _ := json.Marshal(formattedQuoteBlocks)
+		stockyboiapi.PostToSlack("", jsonResp)
+	} else {
+		stockyboiapi.SlackPostText(
+			"You're not currently tracking any tickers",
+			"",
+		)
+	}
 }
 
 // Simple slash command support for showing current tickers
