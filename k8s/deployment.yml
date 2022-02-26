@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stockyboi-deployment
+  labels:
+    app: stockyboi
+spec:
+  selector:
+    matchLabels:
+      app: stockyboi
+  template:
+    metadata:
+      labels:
+        app: stockyboi
+    spec:
+      containers:
+        - name: stockyboi
+          image: ghcr.io/nick-ducker/stockyboi:latest
+          imagePullPolicy: Always
+          ports: 
+          - containerPort: 8080
+          envFrom:
+          - secretRef: 
+              name: stockyboi-secrets
+      imagePullSecrets: 
+        - name: dockerconfigjson-github-com
