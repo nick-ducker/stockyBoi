@@ -130,11 +130,13 @@ func showSummary(c *gin.Context) {
 
 // Automated cron job for posting ticker details
 func cronStockSummary(timezone string) {
-	time.LoadLocation(timezone)
-	day := time.Now().Weekday()
-	// Sunday = 0, Saturday = 6
-	if day != 0 && day != 6 {
-		stockSummary(timezone)
+	if len(tickers) > 0 {
+		time.LoadLocation(timezone)
+		day := time.Now().Weekday()
+		// Sunday = 0, Saturday = 6
+		if day != 0 && day != 6 {
+			stockSummary(timezone)
+		}
 	}
 }
 
