@@ -12,3 +12,6 @@ Some key commands so I don't forget:
 
     `kubectl rollout restart deploy <name>`
 
+**Figure out which port the dang thing is running on**
+
+    `kubectl get svc <deployment name>`
